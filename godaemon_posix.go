@@ -13,7 +13,7 @@ const (
 	envVarValue = "1"
 )
 
-// func Reborn daemonizing process.
+// func Reborn daemonize process.
 func Reborn(umask int, workDir string) (err error) {
 
 	if isParent() {
