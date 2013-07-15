@@ -20,22 +20,32 @@ func main() {
 
 	SignalsHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
 	SignalsHandler(HupHandler, syscall.SIGHUP)
-	ServeSignals()
+	SignalsHandler(Usr1Handler, syscall.SIGUSR1)
+	if err := ServeSignals(); err != nil {
+		log.Println("Error:", err)
+	}
 
 	log.Println("--- end ---")
 }
 
-func TermHandler(sig os.Signal) error {
+func TermHandler(sig os.Signal) (stop bool, err error) {
 	log.Println("SIGTERM:", sig)
-	return ErrServTerm
+	stop = true
+	return
 }
 
-func HupHandler(sig os.Signal) error {
+func HupHandler(sig os.Signal) (stop bool, err error) {
 	log.Println("SIGHUP:", sig)
-	return nil
+	stop = false
+	return
 }
 
-type SignalHandlerFunc func(sig os.Signal) error
+func Usr1Handler(sig os.Signal) (stop bool, err error) {
+	log.Println("SIGUSR1:", sig)
+	return true, errors.New("some error")
+}
+
+type SignalHandlerFunc func(sig os.Signal) (stop bool, err error)
 
 func SignalsHandler(handler SignalHandlerFunc, signals ...os.Signal) {
 	for _, sig := range signals {
@@ -52,9 +62,10 @@ func ServeSignals() (err error) {
 	ch := make(chan os.Signal, 8)
 	signal.Notify(ch, signals...)
 
+	var stop bool
 	for sig := range ch {
-		err = handlers[sig](sig)
-		if err != nil {
+		stop, err = handlers[sig](sig)
+		if stop {
 			break
 		}
 	}
@@ -63,7 +74,5 @@ func ServeSignals() (err error) {
 
 	return
 }
-
-var ErrServTerm = errors.New("Termination signals service")
 
 var handlers = make(map[os.Signal]SignalHandlerFunc)
