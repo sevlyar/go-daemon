@@ -8,9 +8,13 @@ import (
 	"syscall"
 )
 
-var EnvVarName string = "GO_DAEMON"
+const (
+	envVarName  = "_GO_DAEMON"
+	envVarValue = "1"
+)
 
-func Daemonize(umask int, workDir string) (err error) {
+// func Reborn daemonizing process.
+func Reborn(umask int, workDir string) (err error) {
 
 	if isParent() {
 		// parent process - fork and exec
@@ -44,10 +48,8 @@ func Daemonize(umask int, workDir string) (err error) {
 	return
 }
 
-const DAEMON_VALUE = "1"
-
 func isParent() bool {
-	return os.Getenv(EnvVarName) != DAEMON_VALUE
+	return os.Getenv(envVarName) != envVarValue
 }
 
 func prepareCommand(path string) (cmd *exec.Cmd) {
@@ -56,8 +58,20 @@ func prepareCommand(path string) (cmd *exec.Cmd) {
 	cmd = exec.Command(path, os.Args[1:]...)
 
 	// prepare environment variables
-	envVar := fmt.Sprintf("%s=%s", EnvVarName, DAEMON_VALUE)
+	envVar := fmt.Sprintf("%s=%s", envVarName, envVarValue)
 	cmd.Env = append(os.Environ(), envVar)
+
+	return
+}
+
+func RedirectStream(stream, target *os.File) (err error) {
+
+	stdoutFd := int(stream.Fd())
+	if err = syscall.Close(stdoutFd); err != nil {
+		return
+	}
+
+	err = syscall.Dup2(int(target.Fd()), stdoutFd)
 
 	return
 }
