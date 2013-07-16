@@ -10,23 +10,16 @@ import (
 )
 
 func ExampleReborn() {
-
 	err := daemon.Reborn(027, "/")
 	if err != nil {
+		log.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	signals := make(chan os.Signal, 8)
-	signal.Notify(signals, syscall.SIGKILL, syscall.SIGTERM)
-	for sig := range signals {
-		if sig == syscall.SIGTERM {
-			return
-		}
-	}
+	daemon.ServeSignals()
 }
 
 func ExampleRedirectStream() {
-
 	file, err := os.OpenFile("/tmp/daemon-log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		os.Exit(1)
@@ -45,7 +38,6 @@ func ExampleRedirectStream() {
 }
 
 func ExampleServeSignals() {
-
 	TermHandler := func(sig os.Signal) (stop bool, err error) {
 		log.Println("SIGTERM:", sig)
 		stop = true
@@ -65,4 +57,19 @@ func ExampleServeSignals() {
 	if err != nil {
 		log.Println("Error:", err)
 	}
+}
+
+func ExampleLockPidFile() {
+	pidf, err := daemon.LockPidFile("name.pid", 0600)
+	if err != nil {
+		if err == daemon.ErrWouldBlock {
+			log.Println("daemon already exists")
+		} else {
+			log.Println("pid file creation error:", err)
+		}
+		return
+	}
+	defer pidf.Unlock()
+
+	daemon.ServeSignals()
 }
