@@ -11,11 +11,11 @@ Installation
 Documentation
 -------------
 
-After installation run godoc ad http server:
+After installation run godoc as http server:
 
 	godoc -http:8080
 
-And open in browser address 127.0.0.1:8080.
+And open address [127.0.0.1:8080](127.0.0.1:8080) in browser.
 
 Usage
 -----
