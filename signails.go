@@ -1,11 +1,14 @@
 package daemon
 
 import (
+	"errors"
 	"os"
 	"os/signal"
 )
 
-type SignalHandlerFunc func(sig os.Signal) (stop bool, err error)
+var ErrStop = errors.New("stop serve signals")
+
+type SignalHandlerFunc func(sig os.Signal) (err error)
 
 func SignalsHandler(handler SignalHandlerFunc, signals ...os.Signal) {
 	for _, sig := range signals {
@@ -22,15 +25,18 @@ func ServeSignals() (err error) {
 	ch := make(chan os.Signal, 8)
 	signal.Notify(ch, signals...)
 
-	var stop bool
 	for sig := range ch {
-		stop, err = handlers[sig](sig)
-		if stop {
+		err = handlers[sig](sig)
+		if err != nil {
 			break
 		}
 	}
 
 	signal.Stop(ch)
+
+	if err == ErrStop {
+		err = nil
+	}
 
 	return
 }
