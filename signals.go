@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 // ErrStop should be returned signal handler function

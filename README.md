@@ -15,7 +15,7 @@ After installation run godoc as http server:
 
 	godoc -http:8080
 
-And open address [127.0.0.1:8080](127.0.0.1:8080) in browser.
+And open address [http://127.0.0.1:8080/pkg/github.com/sevlyar/go-daemon/](http://127.0.0.1:8080/pkg/github.com/sevlyar/go-daemon/) in browser.
 
 Usage
 -----
