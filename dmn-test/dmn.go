@@ -2,10 +2,9 @@ package main
 
 import (
 	"errors"
-	"github.com/sevlyar/go-daemon"
+	"go-daemon"
 	"log"
 	"os"
-	"os/signal"
 	"syscall"
 )
 
@@ -18,10 +17,12 @@ func main() {
 	file.Close()
 	log.Println("--- log ---")
 
-	SignalsHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
-	SignalsHandler(HupHandler, syscall.SIGHUP)
-	SignalsHandler(Usr1Handler, syscall.SIGUSR1)
-	if err := ServeSignals(); err != nil {
+	daemon.SignalsHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
+	daemon.SignalsHandler(HupHandler, syscall.SIGHUP)
+	daemon.SignalsHandler(Usr1Handler, syscall.SIGUSR1)
+
+	err := daemon.ServeSignals()
+	if err != nil {
 		log.Println("Error:", err)
 	}
 
@@ -44,35 +45,3 @@ func Usr1Handler(sig os.Signal) (stop bool, err error) {
 	log.Println("SIGUSR1:", sig)
 	return true, errors.New("some error")
 }
-
-type SignalHandlerFunc func(sig os.Signal) (stop bool, err error)
-
-func SignalsHandler(handler SignalHandlerFunc, signals ...os.Signal) {
-	for _, sig := range signals {
-		handlers[sig] = handler
-	}
-}
-
-func ServeSignals() (err error) {
-	signals := make([]os.Signal, 0, len(handlers))
-	for sig, _ := range handlers {
-		signals = append(signals, sig)
-	}
-
-	ch := make(chan os.Signal, 8)
-	signal.Notify(ch, signals...)
-
-	var stop bool
-	for sig := range ch {
-		stop, err = handlers[sig](sig)
-		if stop {
-			break
-		}
-	}
-
-	signal.Stop(ch)
-
-	return
-}
-
-var handlers = make(map[os.Signal]SignalHandlerFunc)

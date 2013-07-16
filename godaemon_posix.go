@@ -35,7 +35,7 @@ func Reborn(umask int, workDir string) (err error) {
 	// child process - daemon
 	syscall.Umask(umask)
 
-	if workDir != nil || len(workDir) == 0 {
+	if len(workDir) == 0 {
 		if err = os.Chdir(workDir); err != nil {
 			return
 		}
