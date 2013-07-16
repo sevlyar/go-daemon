@@ -1,3 +1,4 @@
+// Package daemon provides function to daemonization processes.
 package daemon
 
 import (
@@ -13,7 +14,11 @@ const (
 	envVarValue = "1"
 )
 
-// func Reborn daemonize process.
+// func Reborn daemonize process. Function Reborn calls ForkExec
+// in the parent process and terminates him. In the child process,
+// function sets umask, work dir and calls Setsid. Function sets
+// for child process environment variable _GO_DAEMON=1 - the mark,
+// might used for debug.
 func Reborn(umask uint32, workDir string) (err error) {
 
 	if isParent() {
@@ -43,19 +48,21 @@ func Reborn(umask uint32, workDir string) (err error) {
 
 	_, err = syscall.Setsid()
 
-	// Do not requere redirect std
-	// on /dev/null, this work done
-	// forkExec func
+	// Do not required redirect std
+	// to /dev/null, this work was 
+	// done function ForkExec
 
 	return
 }
 
-func isParent() bool {
-	return os.Getenv(envVarName) != envVarValue
-}
-
+// func IsWasReborn, return true if the process has environment
+// variable _GO_DAEMON=1 (child process).
 func IsWasReborn() bool {
 	return !isParent()
+}
+
+func isParent() bool {
+	return os.Getenv(envVarName) != envVarValue
 }
 
 func prepareCommand(path string) (cmd *exec.Cmd) {
@@ -70,9 +77,10 @@ func prepareCommand(path string) (cmd *exec.Cmd) {
 	return
 }
 
-func RedirectStream(stream, target *os.File) (err error) {
+// func RedirectStream redirects stream s to stream target.
+func RedirectStream(s, target *os.File) (err error) {
 
-	stdoutFd := int(stream.Fd())
+	stdoutFd := int(s.Fd())
 	if err = syscall.Close(stdoutFd); err != nil {
 		return
 	}
