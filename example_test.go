@@ -40,3 +40,26 @@ func ExampleRedirectStream() {
 	fmt.Println("some message")
 	log.Println("some message")
 }
+
+func ExampleServeSignals() {
+
+	TermHandler := func(sig os.Signal) (stop bool, err error) {
+		log.Println("SIGTERM:", sig)
+		stop = true
+		return
+	}
+
+	HupHandler := func(sig os.Signal) (stop bool, err error) {
+		log.Println("SIGHUP:", sig)
+		stop = false
+		return
+	}
+
+	daemon.SignalsHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
+	daemon.SignalsHandler(HupHandler, syscall.SIGHUP)
+
+	err := daemon.ServeSignals()
+	if err != nil {
+		log.Println("Error:", err)
+	}
+}
