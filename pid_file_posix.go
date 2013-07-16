@@ -6,13 +6,16 @@ import (
 	"syscall"
 )
 
+// PidFile contains information of pid-file.
 type PidFile struct {
 	file *os.File
 	path string
 }
 
+// ErrWoldBlock indicates on locking pid-file by another process.
 var ErrWouldBlock = syscall.EWOULDBLOCK
 
+// func LockPidFile trys create and lock pid-file.
 func LockPidFile(path string, perm os.FileMode) (pidf *PidFile, err error) {
 	var fileLen int
 
@@ -50,6 +53,7 @@ SKIP:
 	return
 }
 
+// func Unlock unlocks and removes pid-file.
 func (pidf *PidFile) Unlock() (err error) {
 
 	err = syscall.Unlink(pidf.path)

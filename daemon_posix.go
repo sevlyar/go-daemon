@@ -49,7 +49,7 @@ func Reborn(umask uint32, workDir string) (err error) {
 	_, err = syscall.Setsid()
 
 	// Do not required redirect std
-	// to /dev/null, this work was 
+	// to /dev/null, this work was
 	// done function ForkExec
 
 	return
@@ -77,7 +77,7 @@ func prepareCommand(path string) (cmd *exec.Cmd) {
 	return
 }
 
-// func RedirectStream redirects stream s to stream target.
+// func RedirectStream redirects file s to file target.
 func RedirectStream(s, target *os.File) (err error) {
 
 	stdoutFd := int(s.Fd())
