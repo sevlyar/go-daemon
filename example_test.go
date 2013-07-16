@@ -10,7 +10,9 @@ import (
 )
 
 func ExampleReborn() {
-	if err := daemon.Reborn(027, "/"); err != nil {
+
+	err := daemon.Reborn(027, "/")
+	if err != nil {
 		os.Exit(1)
 	}
 
@@ -24,6 +26,7 @@ func ExampleReborn() {
 }
 
 func ExampleRedirectStream() {
+
 	file, err := os.OpenFile("/tmp/daemon-log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		os.Exit(1)
