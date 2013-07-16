@@ -6,16 +6,22 @@ import (
 	"os/signal"
 )
 
+// ErrStop should be returned signal handler function
+// for termination of handling signals.
 var ErrStop = errors.New("stop serve signals")
 
+// SignalHandlerFunc is the interface for signal handler functions.
 type SignalHandlerFunc func(sig os.Signal) (err error)
 
-func SignalsHandler(handler SignalHandlerFunc, signals ...os.Signal) {
+// func SetHandler sets handler for the given signals.
+// SIGTERM has the default handler, he returns ErrStop.
+func SetHandler(handler SignalHandlerFunc, signals ...os.Signal) {
 	for _, sig := range signals {
 		handlers[sig] = handler
 	}
 }
 
+// func ServeSignals calls handlers for system signals.
 func ServeSignals() (err error) {
 	signals := make([]os.Signal, 0, len(handlers))
 	for sig, _ := range handlers {
@@ -42,3 +48,11 @@ func ServeSignals() (err error) {
 }
 
 var handlers = make(map[os.Signal]SignalHandlerFunc)
+
+func init() {
+	handlers[syscall.SIGTERM] = sigtermDefaultHandler
+}
+
+func sigtermDefaultHandler(sig os.Signal) error {
+	return ErrStop
+}
