@@ -14,7 +14,7 @@ const (
 )
 
 // func Reborn daemonize process.
-func Reborn(umask int, workDir string) (err error) {
+func Reborn(umask uint32, workDir string) (err error) {
 
 	if isParent() {
 		// parent process - fork and exec
@@ -33,7 +33,7 @@ func Reborn(umask int, workDir string) (err error) {
 	}
 
 	// child process - daemon
-	syscall.Umask(umask)
+	syscall.Umask(int(umask))
 
 	if len(workDir) == 0 {
 		if err = os.Chdir(workDir); err != nil {
@@ -52,6 +52,10 @@ func Reborn(umask int, workDir string) (err error) {
 
 func isParent() bool {
 	return os.Getenv(envVarName) != envVarValue
+}
+
+func IsWasReborn() bool {
+	return !isParent()
 }
 
 func prepareCommand(path string) (cmd *exec.Cmd) {
