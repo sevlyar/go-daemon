@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"go-daemon"
 	"log"
 	"os"
@@ -21,7 +22,13 @@ const (
 	ret_REBORNERROR
 )
 
+var (
+	status = flag.Bool("status", false, "check status of the daemon")
+	silent = flag.Bool("silent", false, "don't write in stdout")
+)
+
 func main() {
+	flag.Parse()
 
 	setupLogging()
 
@@ -57,6 +64,12 @@ func setupLogging() {
 		file.Close()
 	} else {
 		log.SetFlags(0)
+		if *silent {
+			file, _ := os.OpenFile(os.DevNull, os.O_WRONLY, fileMask)
+			daemon.RedirectStream(os.Stdout, file)
+			daemon.RedirectStream(os.Stderr, file)
+			file.Close()
+		}
 	}
 }
 
@@ -75,6 +88,11 @@ func lockPidFile() *daemon.PidFile {
 	// unlock pid file, if deamon be reborn
 	if !daemon.IsWasReborn() {
 		pidf.Unlock()
+	}
+
+	// normal termination in case status checking
+	if *status {
+		os.Exit(ret_OK)
 	}
 
 	return pidf

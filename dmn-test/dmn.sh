@@ -11,11 +11,11 @@ cd $WORK_DIR
 
 PID=
 getpid() {
-	if [ -f $PID_FILE ]; then
-		PID=`cat $PID_FILE`
-	else
+	if ./dmn-test --status --silent; then
 		echo "daemon is not running"
 		exit
+	else
+		PID=`cat $PID_FILE`
 	fi
 }
 
