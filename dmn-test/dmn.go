@@ -36,9 +36,9 @@ func main() {
 
 	log.Println("--- log ---")
 
-	daemon.SignalsHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
-	daemon.SignalsHandler(HupHandler, syscall.SIGHUP)
-	daemon.SignalsHandler(Usr1Handler, syscall.SIGUSR1)
+	daemon.SetHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
+	daemon.SetHandler(HupHandler, syscall.SIGHUP)
+	daemon.SetHandler(Usr1Handler, syscall.SIGUSR1)
 
 	err = daemon.ServeSignals()
 	if err != nil {
@@ -65,7 +65,7 @@ func lockPidFile() *daemon.PidFile {
 	pidf, err := daemon.LockPidFile(pidFileName, fileMask)
 	if err != nil {
 		if err == daemon.ErrWouldBlock {
-			log.Println("daemon already exists")
+			log.Println("daemon copy is already running")
 			os.Exit(ret_ALREADYRUN)
 		} else {
 			log.Println("pid file creation error:", err)
