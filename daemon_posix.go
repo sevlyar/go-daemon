@@ -1,5 +1,5 @@
 // Package daemon provides function to daemonization processes.
-// And such as the handling of system signals and the file creation.
+// And such as the handling of system signals and the pid-file creation.
 package daemon
 
 import (
