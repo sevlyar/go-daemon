@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"go-daemon"
 	"log"
 	"os"
@@ -93,5 +92,5 @@ func HupHandler(sig os.Signal) error {
 
 func Usr1Handler(sig os.Signal) error {
 	log.Println("SIGUSR1:", sig)
-	return errors.New("some error")
+	panic("fatal error")
 }

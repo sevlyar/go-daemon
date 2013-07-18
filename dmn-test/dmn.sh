@@ -9,12 +9,15 @@ LOG_FILE=dmn.log
 cd $WORK_DIR
 
 
-if [ -f $PID_FILE ]; then
-	PID=`cat $PID_FILE`
-else
-	PID="not found"
-fi
-
+PID=
+getpid() {
+	if [ -f $PID_FILE ]; then
+		PID=`cat $PID_FILE`
+	else
+		echo "daemon is not running"
+		exit
+	fi
+}
 
 case "$1" in
 	start)
@@ -26,17 +29,30 @@ case "$1" in
 		;;
 
 	stop)
-		if [ -f $PID_FILE ]; then
-			PID=`cat $PID_FILE`
-			kill -TERM $PID
-			cat $LOG_FILE
-		fi
+		getpid
+		kill -TERM $PID
+		echo "stopping daemon: OK"
+		cat $LOG_FILE
 		;;
 
 	status)
+		getpid
 		echo "daemon pid: $PID"
 		;;
 
+	reload)
+		getpid
+		kill -HUP $PID
+		echo "reloading daemon config: OK"
+		;;
+
+	crash)
+		getpid
+		kill -USR1 $PID
+		echo "crashing daemon: OK"
+		cat $LOG_FILE
+		;;
+
 	*)
-		echo "Usage: dmn.sh {start|stop|status}"
+		echo "Usage: dmn.sh {start|stop|status|reload|crash}"
 esac
