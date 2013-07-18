@@ -4,14 +4,15 @@
 WORK_DIR=../../../bin
 PID_FILE=dmn.pid
 LOG_FILE=dmn.log
-
+DMN="./dmn-test"
+DMN_STATUS="$DMN --status --silent"
 
 cd $WORK_DIR
 
 
 PID=
 getpid() {
-	if ./dmn-test --status --silent; then
+	if $DMN_STATUS; then
 		echo "daemon is not running"
 		exit
 	else
@@ -21,7 +22,7 @@ getpid() {
 
 case "$1" in
 	start)
-		if ./dmn-test; then
+		if $DMN; then
 			echo "starting daemon: OK"
 		else
 			echo "daemon return error code: $?"
@@ -32,7 +33,6 @@ case "$1" in
 		getpid
 		kill -TERM $PID
 		echo "stopping daemon: OK"
-		cat $LOG_FILE
 		;;
 
 	status)
@@ -50,9 +50,20 @@ case "$1" in
 		getpid
 		kill -USR1 $PID
 		echo "crashing daemon: OK"
-		cat $LOG_FILE
 		;;
 
+	log-clean)
+		if $DMN_STATUS; then
+			echo "" > $LOG_FILE
+			echo "log cleaned"
+		else
+			echo "unable clean"
+		fi
+		;;
+
+	log)
+		cat $LOG_FILE
+		;;
 	*)
-		echo "Usage: dmn.sh {start|stop|status|reload|crash}"
+		echo "Usage: dmn.sh {start|stop|status|reload|crash|log-clean|log}"
 esac
