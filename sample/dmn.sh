@@ -4,7 +4,7 @@
 WORK_DIR=../../../bin
 PID_FILE=dmn.pid
 LOG_FILE=dmn.log
-DMN="./dmn-test"
+DMN="./sample"
 DMN_STATUS="$DMN --status --silent"
 
 cd $WORK_DIR
