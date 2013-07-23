@@ -52,7 +52,7 @@ case "$1" in
 		echo "crashing daemon: OK"
 		;;
 
-	log-clean)
+	clean)
 		if $DMN_STATUS; then
 			echo "" > $LOG_FILE
 			echo "log cleaned"
@@ -65,5 +65,5 @@ case "$1" in
 		cat $LOG_FILE
 		;;
 	*)
-		echo "Usage: dmn.sh {start|stop|status|reload|crash|log-clean|log}"
+		echo "Usage: dmn.sh {start|stop|status|reload|crash|clean|log}"
 esac
