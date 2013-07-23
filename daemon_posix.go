@@ -22,7 +22,7 @@ const (
 // might used for debug.
 func Reborn(umask uint32, workDir string) (err error) {
 
-	if isParent() {
+	if !IsWasReborn() {
 		// parent process - fork and exec
 		var path string
 		if path, err = filepath.Abs(os.Args[0]); err != nil {
@@ -59,11 +59,7 @@ func Reborn(umask uint32, workDir string) (err error) {
 // func IsWasReborn, return true if the process has environment
 // variable _GO_DAEMON=1 (child process).
 func IsWasReborn() bool {
-	return !isParent()
-}
-
-func isParent() bool {
-	return os.Getenv(envVarName) != envVarValue
+	return os.Getenv(envVarName) == envVarValue
 }
 
 func prepareCommand(path string) (cmd *exec.Cmd) {
