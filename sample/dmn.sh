@@ -8,7 +8,7 @@ DMN="./sample"
 DMN_STATUS="$DMN --status --silent"
 
 cd $WORK_DIR
-
+#export _GO_DAEMON=1
 
 PID=
 getpid() {
@@ -46,12 +46,6 @@ case "$1" in
 		echo "reloading daemon config: OK"
 		;;
 
-	crash)
-		getpid
-		kill -USR1 $PID
-		echo "crashing daemon: OK"
-		;;
-
 	clean)
 		if $DMN_STATUS; then
 			echo "" > $LOG_FILE
@@ -65,5 +59,5 @@ case "$1" in
 		cat $LOG_FILE
 		;;
 	*)
-		echo "Usage: dmn.sh {start|stop|status|reload|crash|clean|log}"
+		echo "Usage: dmn.sh {start|stop|status|reload|clean|log}"
 esac

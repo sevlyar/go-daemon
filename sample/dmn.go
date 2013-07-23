@@ -43,7 +43,7 @@ var (
 		Daemon refuses to start if there is no configuration file.`)
 )
 
-var confProv = make(chan Config)
+var confProv = make(chan Config, 8)
 
 func main() {
 	flag.Parse()
@@ -60,7 +60,6 @@ func main() {
 	}
 
 	pidf := lockPidFile()
-
 	err = daemon.Reborn(027, "./")
 	if err != nil {
 		log.Println("Reborn error:", err)
@@ -101,6 +100,8 @@ func loadConfig(path string) (config Config, err error) {
 	if err != nil {
 		return
 	}
+	defer file.Close()
+
 	config = make([]string, 0)
 	err = json.NewDecoder(file).Decode(&config)
 	if err != nil {
