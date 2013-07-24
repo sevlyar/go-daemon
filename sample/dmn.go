@@ -75,7 +75,7 @@ func main() {
 }
 
 func setupLogging() {
-	if daemon.IsWasReborn() {
+	if daemon.WasReborn() {
 		file, _ := os.OpenFile(logFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, fileMask)
 		daemon.RedirectStream(os.Stdout, file)
 		daemon.RedirectStream(os.Stderr, file)
@@ -128,7 +128,7 @@ func lockPidFile() *daemon.PidFile {
 		}
 	}
 
-	if !daemon.IsWasReborn() {
+	if !daemon.WasReborn() {
 		pidf.Unlock()
 	}
 
