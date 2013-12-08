@@ -1,4 +1,4 @@
-go-daemon
+go-daemon 
 =========
 
 A library for writing system daemons in golang.
@@ -21,3 +21,7 @@ Usage
 	...
 	daemon.Reborn(027, "/")
 	...
+
+Build status
+------------
+[![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon)
