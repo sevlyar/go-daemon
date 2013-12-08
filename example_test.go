@@ -50,8 +50,8 @@ func ExampleServeSignals() {
 		return
 	}
 
-	daemon.SignalsHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
-	daemon.SignalsHandler(HupHandler, syscall.SIGHUP)
+	daemon.SetHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
+	daemon.SetHandler(HupHandler, syscall.SIGHUP)
 
 	err := daemon.ServeSignals()
 	if err != nil {
