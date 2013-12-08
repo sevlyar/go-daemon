@@ -38,16 +38,14 @@ func ExampleRedirectStream() {
 }
 
 func ExampleServeSignals() {
-	TermHandler := func(sig os.Signal) (stop bool, err error) {
+	TermHandler := func(sig os.Signal) error {
 		log.Println("SIGTERM:", sig)
-		stop = true
-		return
+		return daemon.ErrStop
 	}
 
-	HupHandler := func(sig os.Signal) (stop bool, err error) {
+	HupHandler := func(sig os.Signal) error {
 		log.Println("SIGHUP:", sig)
-		stop = false
-		return
+		return nil
 	}
 
 	daemon.SetHandler(TermHandler, syscall.SIGTERM, syscall.SIGKILL)
