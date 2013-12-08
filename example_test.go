@@ -2,7 +2,7 @@ package daemon_test
 
 import (
 	"fmt"
-	"go-daemon"
+	"github.com/sevlyar/go-daemon"
 	"log"
 	"os"
 	"os/signal"
