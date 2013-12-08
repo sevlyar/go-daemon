@@ -5,7 +5,6 @@ import (
 	"github.com/sevlyar/go-daemon"
 	"log"
 	"os"
-	"os/signal"
 	"syscall"
 )
 
