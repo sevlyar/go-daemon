@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/sevlyar/go-daemon"
+	deamon "github.com/sevlyar/go-daemon/old"
 	"log"
 	"os"
 	"syscall"
