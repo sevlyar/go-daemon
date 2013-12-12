@@ -1,157 +1,81 @@
+// Package daemon provides function to daemonization processes.
+// And such as the handling of system signals and the pid-file creation.
 package daemon
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"syscall"
 )
 
 const (
-	markName  = "_GO_DAEMON"
-	markValue = "1"
+	envVarName  = "_GO_DAEMON"
+	envVarValue = "1"
 )
 
-func WasReborn() bool {
-	return os.Getenv(markName) == markValue
-}
+// func Reborn daemonize process. Function Reborn calls ForkExec
+// in the parent process and terminates him. In the child process,
+// function sets umask, work dir and calls Setsid. Function sets
+// for child process environment variable _GO_DAEMON=1 - the mark,
+// might used for debug.
+func Reborn(umask uint32, workDir string) (err error) {
 
-type Context struct {
-	PidFile string
-	PidPerm os.FileMode
-	LogFile string
-	LogPerm os.FileMode
-
-	WorkDir    string
-	Chroot     string
-	Env        []string
-	Args       []string
-	Credential *syscall.Credential
-	Umask      int
-
-	abspath  string
-	pidFile  *os.File
-	logFile  *os.File
-	nullFile *os.File
-
-	rpipe, wpipe *os.File
-
-	hidden *Context
-}
-
-func (d *Context) Reborn() (child *os.Process, err error) {
 	if !WasReborn() {
-		child, err = d.parent()
-	} else {
-		err = d.child()
-	}
-	return
-}
-
-func (d *Context) openFiles() (err error) {
-	if d.nullFile, err = os.Open(os.DevNull); err != nil {
-		return
-	}
-
-	if len(d.PidFile) > 0 {
-		var pid *LockFile
-		if pid, err = CreatePidFile(d.PidFile, d.PidPerm); err != nil {
+		// parent process - fork and exec
+		var path string
+		if path, err = filepath.Abs(os.Args[0]); err != nil {
 			return
 		}
-		d.pidFile = pid.File
-	} else {
-		d.pidFile = d.nullFile
-	}
 
-	if len(d.LogFile) > 0 {
-		if d.logFile, err = os.OpenFile(d.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, d.LogPerm); err != nil {
+		cmd := prepareCommand(path)
+
+		if err = cmd.Start(); err != nil {
 			return
 		}
-	} else {
-		d.logFile = d.nullFile
+
+		os.Exit(0)
 	}
 
-	d.rpipe, d.wpipe, err = os.Pipe()
-	return
-}
+	// child process - daemon
+	syscall.Umask(int(umask))
 
-func (d *Context) closeFiles() (err error) {
-	return
-}
-
-func (d *Context) prepareEnv() (err error) {
-	if d.abspath, err = filepath.Abs(os.Args[0]); err != nil {
-		return
+	if len(workDir) != 0 {
+		if err = os.Chdir(workDir); err != nil {
+			return
+		}
 	}
 
-	if len(d.Args) == 0 {
-		d.Args = os.Args[1:]
-	}
+	_, err = syscall.Setsid()
 
-	mark := fmt.Sprintf("%s=%s", markName, markValue)
-	if len(d.Env) == 0 {
-		d.Env = os.Environ()
-	}
-	d.Env = append(d.Env, mark)
+	// Do not required redirect std
+	// to /dev/null, this work was
+	// done function ForkExec
 
 	return
 }
 
-func (d *Context) parent() (child *os.Process, err error) {
-	if err = d.prepareEnv(); err != nil {
-		return
-	}
+// func WasReborn, return true if the process has environment
+// variable _GO_DAEMON=1 (child process).
+func WasReborn() bool {
+	return os.Getenv(envVarName) == envVarValue
+}
 
-	if err = d.openFiles(); err != nil {
-		return
-	}
-	defer d.closeFiles()
+func prepareCommand(path string) (cmd *exec.Cmd) {
 
-	attr := &os.ProcAttr{
-		Dir:   d.WorkDir,
-		Env:   d.Env,
-		Files: []*os.File{d.rpipe, d.nullFile, d.logFile, d.pidFile},
-		Sys: &syscall.SysProcAttr{
-			Chroot:     d.Chroot,
-			Credential: d.Credential,
-			Setsid:     true,
-		},
-	}
+	// prepare command-line arguments
+	cmd = exec.Command(path, os.Args[1:]...)
 
-	if child, err = os.StartProcess(d.abspath, d.Args, attr); err != nil {
-		return
-	}
-
-	d.rpipe.Close()
-	encoder := json.NewEncoder(d.wpipe)
-	err = encoder.Encode(d)
+	// prepare environment variables
+	envVar := fmt.Sprintf("%s=%s", envVarName, envVarValue)
+	cmd.Env = append(os.Environ(), envVar)
 
 	return
 }
 
-func (d *Context) child() (err error) {
-	//d.hidden = new(Context)
-	decoder := json.NewDecoder(os.Stdin)
-	if err = decoder.Decode(d); err != nil {
-		return
-	}
-
-	syscall.Umask(int(d.Umask))
-
-	// TODO: replace /dev/null
-	DupFile(os.Stdin, os.Stdout)
-
-	return
-}
-
-func (d *Context) Release() {
-
-}
-
-// TODO: rename this
 // func RedirectStream redirects file s to file target.
-func DupFile(s, target *os.File) (err error) {
+func RedirectStream(s, target *os.File) (err error) {
 
 	stdoutFd := int(s.Fd())
 	if err = syscall.Close(stdoutFd); err != nil {
