@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"syscall"
 )
@@ -60,21 +61,26 @@ func (file *LockFile) WritePid() (err error) {
 	if err = file.Truncate(int64(fileLen)); err != nil {
 		return
 	}
+	err = file.Sync()
 	return
 }
 
 func (file *LockFile) Remove() error {
-	name, err := GetFdName(file.Fd())
-	if err != nil {
+	defer file.Close()
+
+	if err := file.Unlock(); err != nil {
+		log.Println(err)
 		return err
 	}
-	err = syscall.Unlink(name)
-	err2 := file.Close()
 
-	// return one of two errors
-	if err == nil {
-		err = err2
+	name, err := GetFdName(file.Fd())
+	if err != nil {
+		log.Println(err)
+		return err
 	}
+	log.Println("daemons lock file name:", name)
+
+	err = syscall.Unlink(name)
 	return err
 }
 

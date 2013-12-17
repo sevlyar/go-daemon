@@ -9,12 +9,12 @@ import (
 
 func Example() {
 	dmn := &Context{
-		PidFile: "/var/run/daemon.pid",
-		PidPerm: 0644,
-		LogFile: "/var/log/daemon.log",
-		LogPerm: 0640,
-		WorkDir: "/",
-		Umask:   027,
+		PidFileName: "/var/run/daemon.pid",
+		PidFilePerm: 0644,
+		LogFileName: "/var/log/daemon.log",
+		LogFilePerm: 0640,
+		WorkDir:     "/",
+		Umask:       027,
 	}
 
 	child, err := dmn.Reborn()
@@ -42,8 +42,8 @@ func Example() {
 		return nil
 	}
 
-	SetHandler(termHandler, syscall.SIGTERM, syscall.SIGKILL)
-	SetHandler(hupHandler, syscall.SIGHUP)
+	SetSigHandler(termHandler, syscall.SIGTERM, syscall.SIGKILL)
+	SetSigHandler(hupHandler, syscall.SIGHUP)
 
 	err = ServeSignals()
 	if err != nil {

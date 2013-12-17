@@ -14,9 +14,9 @@ var ErrStop = errors.New("stop serve signals")
 // SignalHandlerFunc is the interface for signal handler functions.
 type SignalHandlerFunc func(sig os.Signal) (err error)
 
-// func SetHandler sets handler for the given signals.
+// func SetSigHandler sets handler for the given signals.
 // SIGTERM has the default handler, he returns ErrStop.
-func SetHandler(handler SignalHandlerFunc, signals ...os.Signal) {
+func SetSigHandler(handler SignalHandlerFunc, signals ...os.Signal) {
 	for _, sig := range signals {
 		handlers[sig] = handler
 	}
