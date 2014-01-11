@@ -19,15 +19,19 @@ type Context struct {
 	PidFilePerm os.FileMode
 	LogFileName string
 	LogFilePerm os.FileMode
-
-	WorkDir    string
-	Chroot     string
-	Env        []string
-	Args       []string
+	// If WorkDir is non-empty, the child changes into the directory before
+	// creating the process.
+	WorkDir string
+	Chroot  string
+	// If Env is non-nil, it gives the environment variables for the
+	// daemon-process in the form returned by Environ.
+	// If it is nil, the result of Environ will be used.
+	Env  []string
+	Args []string
+	// Credential holds user and group identities to be assumed by a daemon-process.
 	Credential *syscall.Credential
-	Umask      int
-
-	Data interface{}
+	// If Umask is non-zero, the daemon-process call Umask() func with given value.
+	Umask int
 
 	abspath  string
 	pidFile  *LockFile
@@ -196,7 +200,9 @@ func (d *Context) child() (err error) {
 		}
 	}
 
-	syscall.Umask(int(d.Umask))
+	if d.Umask != 0 {
+		syscall.Umask(int(d.Umask))
+	}
 	if len(d.Chroot) > 0 {
 		err = syscall.Chroot(d.Chroot)
 	}
@@ -205,6 +211,9 @@ func (d *Context) child() (err error) {
 }
 
 func (d *Context) Release() (err error) {
+	if !WasReborn() {
+		return
+	}
 	if d.pidFile != nil {
 		err = d.pidFile.Remove()
 	}

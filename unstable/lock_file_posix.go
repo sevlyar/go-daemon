@@ -12,14 +12,18 @@ var (
 	ErrWouldBlock = syscall.EWOULDBLOCK
 )
 
+// LockFile wraps *os.File and provide functions for locking of files.
 type LockFile struct {
 	*os.File
 }
 
+// NewLockFile returns a new LockFile with the given File.
 func NewLockFile(file *os.File) *LockFile {
 	return &LockFile{file}
 }
 
+// CreatePidFile opens the named file, applies exclusive lock and writes
+// current process id to file.
 func CreatePidFile(name string, perm os.FileMode) (lock *LockFile, err error) {
 	if lock, err = OpenLockFile(name, perm); err != nil {
 		return
@@ -34,6 +38,8 @@ func CreatePidFile(name string, perm os.FileMode) (lock *LockFile, err error) {
 	return
 }
 
+// OpenLockFile opens the named file with flags os.O_RDWR|os.O_CREATE and specified perm.
+// If successful, function returns LockFile for opened file.
 func OpenLockFile(name string, perm os.FileMode) (lock *LockFile, err error) {
 	var file *os.File
 	if file, err = os.OpenFile(name, os.O_RDWR|os.O_CREATE, perm); err == nil {
@@ -42,14 +48,17 @@ func OpenLockFile(name string, perm os.FileMode) (lock *LockFile, err error) {
 	return
 }
 
+// Lock apply exclusive lock on an open file. If file already locked, returns error.
 func (file *LockFile) Lock() error {
 	return syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
 }
 
+// Unlock remove exclusive lock on an open file.
 func (file *LockFile) Unlock() error {
 	return syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
 }
 
+// WritePid writes current process id to an open file.
 func (file *LockFile) WritePid() (err error) {
 	if _, err = file.Seek(0, os.SEEK_SET); err != nil {
 		return
@@ -65,25 +74,24 @@ func (file *LockFile) WritePid() (err error) {
 	return
 }
 
+// Remove removes lock, closes and removes an open file.
 func (file *LockFile) Remove() error {
 	defer file.Close()
 
 	if err := file.Unlock(); err != nil {
-		log.Println(err)
 		return err
 	}
 
 	name, err := GetFdName(file.Fd())
 	if err != nil {
-		log.Println(err)
 		return err
 	}
-	log.Println("daemons lock file name:", name)
 
 	err = syscall.Unlink(name)
 	return err
 }
 
+// GetFdName returns file name for given descriptor.
 func GetFdName(fd uintptr) (name string, err error) {
 	path := fmt.Sprintf("/proc/self/fd/%d", int(fd))
 
