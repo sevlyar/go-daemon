@@ -15,15 +15,14 @@ Documentation
 
 [http://gowalker.org/github.com/sevlyar/go-daemon](http://gowalker.org/github.com/sevlyar/go-daemon)
 
-Usage
------
-
-	import "github.com/sevlyar/go-daemon"
-
-	...
-	daemon.Reborn(027, "/")
-	...
-
 Build status
 ------------
+
 [![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon)
+
+History
+-------
+
+## 14.01.12
+	* released new major version, old version moved to github.com/sevlyar/go-daemon/oldapi
+
