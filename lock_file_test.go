@@ -12,7 +12,7 @@ import (
 var (
 	filename                = os.TempDir() + "/test.lock"
 	fileperm    os.FileMode = 0644
-	invalidname             = "/dev/alarm"
+	invalidname             = "/x/y/unknown"
 )
 
 func TestCreatePidFile(test *testing.T) {
