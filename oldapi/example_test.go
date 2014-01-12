@@ -2,7 +2,7 @@ package daemon_test
 
 import (
 	"fmt"
-	"github.com/sevlyar/go-daemon"
+	"github.com/sevlyar/go-daemon/oldapi"
 	"log"
 	"os"
 	"syscall"

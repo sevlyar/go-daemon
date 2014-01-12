@@ -1,28 +1,43 @@
-go-daemon 
-=========
+# go-daemon 
 
 A library for writing system daemons in golang.
 
-Installation
-------------
+## Installation
 
 	go get github.com/sevlyar/go-daemon
 
-Documentation
--------------
+## Documentation
 
 [http://godoc.org/github.com/sevlyar/go-daemon](http://godoc.org/github.com/sevlyar/go-daemon)
 
 [http://gowalker.org/github.com/sevlyar/go-daemon](http://gowalker.org/github.com/sevlyar/go-daemon)
 
-Build status
-------------
+## Idea
+
+```go
+func main() {
+	Pre()
+
+	context := new(Context)
+	child, _ := context.Reborn()
+
+	if child != nil {
+		defer context.Release()
+		PostChild()
+	} else {
+		PostParent()
+	}
+}
+```
+
+![](https:/github.com/sevlyar/go-daemon/img/idea.png)
+
+## Build status
 
 [![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon)
 
-History
--------
+## History
 
-## 14.01.12
-	* released new major version, old version moved to github.com/sevlyar/go-daemon/oldapi
+### 14.01.12
+* released new major version, old version moved to github.com/sevlyar/go-daemon/oldapi
 
