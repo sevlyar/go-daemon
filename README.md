@@ -22,15 +22,15 @@ func main() {
 	child, _ := context.Reborn()
 
 	if child != nil {
+		PostParent()
+	} else {
 		defer context.Release()
 		PostChild()
-	} else {
-		PostParent()
 	}
 }
 ```
 
-![](https:/github.com/sevlyar/go-daemon/img/idea.png)
+![](https://github.com/sevlyar/go-daemon/raw/master/img/idea.png)
 
 ## Build status
 
