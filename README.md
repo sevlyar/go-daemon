@@ -1,7 +1,6 @@
-# Library for writing system daemons in golang.
-
-[![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon)
-[![GoDoc](https://godoc.org/github.com/sevlyar/go-daemon?status.png)](https://godoc.org/github.com/sevlyar/go-daemon)
+# go-daemon [![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon) [![GoDoc](https://godoc.org/github.com/sevlyar/go-daemon?status.png)](https://godoc.org/github.com/sevlyar/go-daemon)
+ 
+Library for writing system daemons in golang.
 
 ## Installation
 
