@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"flag"
 	"log"
 	"os"
 	"syscall"
@@ -8,6 +9,21 @@ import (
 )
 
 func Example() {
+	signal := flag.String("s", "", "send signal to daemon")
+
+	handler := func(sig os.Signal) error {
+		log.Println("signal:", sig)
+		if sig == syscall.SIGTERM {
+			return ErrStop
+		}
+		return nil
+	}
+
+	// Define command: command-line arg, system signal and handler
+	AddCommand(StringFlag(signal, "term"), syscall.SIGTERM, handler)
+	AddCommand(StringFlag(signal, "reload"), syscall.SIGHUP, handler)
+
+	// Define daemon context
 	dmn := &Context{
 		PidFileName: "/var/run/daemon.pid",
 		PidFilePerm: 0644,
@@ -17,6 +33,7 @@ func Example() {
 		Umask:       027,
 	}
 
+	// Process daemon operations - send signal if present flag or daemonize
 	child, err := dmn.Reborn()
 	if err != nil {
 		log.Fatalln(err)
@@ -26,24 +43,12 @@ func Example() {
 	}
 	defer dmn.Release()
 
+	// Run main operation
 	go func() {
 		for {
 			time.Sleep(0)
 		}
 	}()
-
-	termHandler := func(sig os.Signal) error {
-		log.Println("SIGTERM:", sig)
-		return ErrStop
-	}
-
-	hupHandler := func(sig os.Signal) error {
-		log.Println("SIGHUP:", sig)
-		return nil
-	}
-
-	SetSigHandler(termHandler, syscall.SIGTERM, syscall.SIGKILL)
-	SetSigHandler(hupHandler, syscall.SIGHUP)
 
 	err = ServeSignals()
 	if err != nil {

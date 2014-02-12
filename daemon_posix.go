@@ -51,6 +51,7 @@ type Context struct {
 	// If Umask is non-zero, the daemon-process call Umask() func with given value.
 	Umask int
 
+	// Struct contains only serializable public fields (!!!)
 	abspath  string
 	pidFile  *LockFile
 	logFile  *os.File
