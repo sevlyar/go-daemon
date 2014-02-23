@@ -73,6 +73,16 @@ func (file *LockFile) WritePid() (err error) {
 	return
 }
 
+// ReadPid reads process id from file and returns pid.
+// If unable read from a file, returns error.
+func (file *LockFile) ReadPid() (pid int, err error) {
+	if _, err = file.Seek(0, os.SEEK_SET); err != nil {
+		return
+	}
+	_, err = fmt.Fscan(file, &pid)
+	return
+}
+
 // Remove removes lock, closes and removes an open file.
 func (file *LockFile) Remove() error {
 	defer file.Close()
