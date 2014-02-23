@@ -84,10 +84,24 @@ func (d *Context) parent() (child *os.Process, err error) {
 		return
 	}
 
+	defer d.closeFiles()
 	if err = d.openFiles(); err != nil {
+		if err == ErrWouldBlock && len(d.PidFileName) > 0 {
+			var (
+				pid  int
+				err1 error
+			)
+			if pid, err1 = d.pidFile.ReadPid(); err1 != nil {
+				err = err1
+				return
+			}
+			if child, err1 = os.FindProcess(pid); err1 != nil {
+				err = err1
+				return
+			}
+		}
 		return
 	}
-	defer d.closeFiles()
 
 	attr := &os.ProcAttr{
 		Dir:   d.WorkDir,
