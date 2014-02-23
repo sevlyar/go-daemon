@@ -71,6 +71,23 @@ func TestGetFdName(test *testing.T) {
 	}
 }
 
+func TestReadPid(test *testing.T) {
+	lock, err := CreatePidFile(filename, fileperm)
+	if err != nil {
+		test.Fatal(err)
+	}
+	defer lock.Remove()
+
+	pid, err := lock.ReadPid()
+	if err != nil {
+		test.Fatal("ReadPid(): Unable read pid from file:", err)
+	}
+
+	if pid != os.Getpid() {
+		test.Fatal("Pid not equal real pid")
+	}
+}
+
 func TestLockFileLock(test *testing.T) {
 	lock, err := OpenLockFile(filename, fileperm)
 	if err != nil {
