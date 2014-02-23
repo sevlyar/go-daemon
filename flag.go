@@ -55,6 +55,15 @@ func AddFlag(f Flag, sig os.Signal) {
 	flags[f] = sig
 }
 
+func SendCommands(p *os.Process) (err error) {
+	for _, sig := range signals() {
+		if err = p.Signal(sig); err != nil {
+			return
+		}
+	}
+	return
+}
+
 func signals() (ret []os.Signal) {
 	ret = make([]os.Signal, 0, 1)
 	for f, sig := range flags {
