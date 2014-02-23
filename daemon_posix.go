@@ -170,7 +170,7 @@ func (d *Context) prepareEnv() (err error) {
 	}
 
 	if len(d.Args) == 0 {
-		d.Args = os.Args[1:]
+		d.Args = os.Args
 	}
 
 	mark := fmt.Sprintf("%s=%s", MARK_NAME, MARK_VALUE)
