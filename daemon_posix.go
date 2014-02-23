@@ -130,6 +130,9 @@ func (d *Context) openFiles() (err error) {
 		if d.pidFile, err = OpenLockFile(d.PidFileName, d.PidFilePerm); err != nil {
 			return
 		}
+		if err = d.pidFile.Lock(); err != nil {
+			return
+		}
 	}
 
 	if len(d.LogFileName) > 0 {
