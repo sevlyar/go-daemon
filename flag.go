@@ -4,7 +4,6 @@ import (
 	"os"
 )
 
-// Not implemented !!!
 func AddCommand(f Flag, sig os.Signal, handler SignalHandlerFunc) {
 	if f != nil {
 		AddFlag(f, sig)
@@ -51,6 +50,10 @@ func (f *stringFlag) IsSet() bool {
 
 var flags = make(map[Flag]os.Signal)
 
+func Flags() map[Flag]os.Signal {
+	return flags
+}
+
 func AddFlag(f Flag, sig os.Signal) {
 	flags[f] = sig
 }
@@ -59,6 +62,16 @@ func SendCommands(p *os.Process) (err error) {
 	for _, sig := range signals() {
 		if err = p.Signal(sig); err != nil {
 			return
+		}
+	}
+	return
+}
+
+func ActiveFlags() (ret []Flag) {
+	ret = make([]Flag, 0, 1)
+	for f := range flags {
+		if f.IsSet() {
+			ret = append(ret, f)
 		}
 	}
 	return
