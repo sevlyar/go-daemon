@@ -22,6 +22,7 @@ func Example() {
 	// Define command: command-line arg, system signal and handler
 	AddCommand(StringFlag(signal, "term"), syscall.SIGTERM, handler)
 	AddCommand(StringFlag(signal, "reload"), syscall.SIGHUP, handler)
+	flag.Parse()
 
 	// Define daemon context
 	dmn := &Context{
@@ -31,6 +32,16 @@ func Example() {
 		LogFilePerm: 0640,
 		WorkDir:     "/",
 		Umask:       027,
+	}
+
+	// Send commands if needed
+	if len(ActiveFlags()) > 0 {
+		d, err := dmn.Search()
+		if err != nil {
+			log.Fatalln("Unable send signal to the daemon:", err)
+		}
+		SendCommands(d)
+		return
 	}
 
 	// Process daemon operations - send signal if present flag or daemonize
