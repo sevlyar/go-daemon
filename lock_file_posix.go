@@ -57,6 +57,20 @@ func (file *LockFile) Unlock() error {
 	return syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
 }
 
+// ReadPidFile reads process id from file with give name and returns pid.
+// If unable read from a file, returns error.
+func ReadPidFile(name string) (pid int, err error) {
+	var file *os.File
+	if file, err = os.OpenFile(name, os.O_RDONLY, 0640); err != nil {
+		return
+	}
+	defer file.Close()
+
+	lock := &LockFile{file}
+	pid, err = lock.ReadPid()
+	return
+}
+
 // WritePid writes current process id to an open file.
 func (file *LockFile) WritePid() (err error) {
 	if _, err = file.Seek(0, os.SEEK_SET); err != nil {
