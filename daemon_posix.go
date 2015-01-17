@@ -247,14 +247,16 @@ func (d *Context) child() (err error) {
 	if len(d.Chroot) > 0 {
 		err = syscall.Chroot(d.Chroot)
 	}
-	if d.Credential.Gid > 0 {
-		if err = syscall.Setgid(int(d.Credential.Gid)); err != nil {
-			return
+	if d.Credential != nil {
+		if d.Credential.Gid > 0 {
+			if err = syscall.Setgid(int(d.Credential.Gid)); err != nil {
+				return
+			}
 		}
-	}
-	if d.Credential.Uid > 0 {
-		if err = syscall.Setuid(int(d.Credential.Uid)); err != nil {
-			return
+		if d.Credential.Uid > 0 {
+			if err = syscall.Setuid(int(d.Credential.Uid)); err != nil {
+				return
+			}
 		}
 	}
 
