@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"syscall"
+
+	"github.com/kardianos/osext"
 )
 
 // Mark of daemon process - system environment variable _GO_DAEMON=1
@@ -180,7 +181,7 @@ func (d *Context) closeFiles() (err error) {
 }
 
 func (d *Context) prepareEnv() (err error) {
-	if d.abspath, err = filepath.Abs(os.Args[0]); err != nil {
+	if d.abspath, err = osext.Executable(); err != nil {
 		return
 	}
 
