@@ -1,12 +1,29 @@
 # go-daemon [![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon) [![GoDoc](https://godoc.org/github.com/sevlyar/go-daemon?status.png)](https://godoc.org/github.com/sevlyar/go-daemon)
- 
+
 Library for writing system daemons in golang.
+
+Now supported only UNIX-based OS (Windows is not supported). But the library was tested only on Linux
+and OSX, so that if you have an ability to test the library on other platforms, give me feedback, please.
 
 ## Installation
 
 	go get github.com/sevlyar/go-daemon
 
+You can use [gopkg.in](http://labix.org/gopkg.in):
+
+	go get gopkg.in/sevlyar/go-daemon.v0
+
+If you want to use the library in production project, please use vendoring,
+because i can not ensure backward compatibility before release v1.0.
+
 ## Idea
+
+We can not use `fork` syscall in Golang's runtime, because child process doesn't inherit
+threads and goroutines in that case. The library uses a simple trick: it runs its own copy with
+a mark - a predefined environment variable. Availability of the variable for the process means
+an execution in the child's copy. So that if the mark is not setted - the library executes
+parent's operations and runs its own copy with mark, and if the mark is setted - the library
+executes child's operations:
 
 ```go
 func main() {
@@ -25,9 +42,4 @@ func main() {
 ```
 
 ![](img/idea.png)
-
-## History
-
-### 14.01.12
-* released new major version, old version moved to github.com/sevlyar/go-daemon/oldapi
 
