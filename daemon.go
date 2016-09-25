@@ -1,8 +1,21 @@
 package daemon
 
 import (
+	"errors"
 	"os"
+	"syscall"
 )
+
+var errNotSupported = errors.New("daemon: Non-POSIX OS is not supported")
+
+// Mark of daemon process - system environment variable _GO_DAEMON=1
+const (
+	MARK_NAME  = "_GO_DAEMON"
+	MARK_VALUE = "1"
+)
+
+// Default file permissions for log and pid files.
+const FILE_PERM = os.FileMode(0640)
 
 // A Context describes daemon context.
 type Context struct {
@@ -34,17 +47,22 @@ type Context struct {
 	Args []string
 
 	// Credential holds user and group identities to be assumed by a daemon-process.
-	Credential *int
+	Credential *syscall.Credential
 	// If Umask is non-zero, the daemon-process call Umask() func with given value.
 	Umask int
 
 	// Struct contains only serializable public fields (!!!)
 	abspath  string
-	pidFile  *int
+	pidFile  *LockFile
 	logFile  *os.File
 	nullFile *os.File
 
 	rpipe, wpipe *os.File
+}
+
+// WasReborn returns true in child process (daemon) and false in parent process.
+func WasReborn() bool {
+	return os.Getenv(MARK_NAME) == MARK_VALUE
 }
 
 // Reborn runs second copy of current process in the given context.
@@ -54,17 +72,17 @@ type Context struct {
 // In success returns *os.Process in parent process and nil in child process.
 // Otherwise returns error.
 func (d *Context) Reborn() (child *os.Process, err error) {
-	return
+	return d.reborn()
 }
 
 // Search search daemons process by given in context pid file name.
 // If success returns pointer on daemons os.Process structure,
 // else returns error. Returns nil if filename is empty.
 func (d *Context) Search() (daemon *os.Process, err error) {
-	return
+	return d.search()
 }
 
 // Release provides correct pid-file release in daemon.
 func (d *Context) Release() (err error) {
-	return
+	return d.release()
 }

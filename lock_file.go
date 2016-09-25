@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"syscall"
@@ -8,7 +9,7 @@ import (
 
 var (
 	// ErrWoldBlock indicates on locking pid-file by another process.
-	ErrWouldBlock = syscall.EWOULDBLOCK
+	ErrWouldBlock = errors.New("Daemon: Resource temporarily unavailable")
 )
 
 // LockFile wraps *os.File and provide functions for locking of files.
@@ -49,12 +50,12 @@ func OpenLockFile(name string, perm os.FileMode) (lock *LockFile, err error) {
 
 // Lock apply exclusive lock on an open file. If file already locked, returns error.
 func (file *LockFile) Lock() error {
-	return syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+	return lockFile(file.Fd())
 }
 
 // Unlock remove exclusive lock on an open file.
 func (file *LockFile) Unlock() error {
-	return syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	return unlockFile(file.Fd())
 }
 
 // ReadPidFile reads process id from file with give name and returns pid.
@@ -105,6 +106,7 @@ func (file *LockFile) Remove() error {
 		return err
 	}
 
+	// TODO(yar): keep filename?
 	name, err := GetFdName(file.Fd())
 	if err != nil {
 		return err
@@ -116,19 +118,5 @@ func (file *LockFile) Remove() error {
 
 // GetFdName returns file name for given descriptor.
 func GetFdName(fd uintptr) (name string, err error) {
-	path := fmt.Sprintf("/proc/self/fd/%d", int(fd))
-
-	var (
-		fi os.FileInfo
-		n  int
-	)
-	if fi, err = os.Lstat(path); err != nil {
-		return
-	}
-	buf := make([]byte, fi.Size()+1)
-
-	if n, err = syscall.Readlink(path, buf); err == nil {
-		name = string(buf[:n])
-	}
-	return
+	return getFdName(fd)
 }
