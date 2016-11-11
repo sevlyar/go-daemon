@@ -161,18 +161,6 @@ func (d *Context) child() (err error) {
 	}
 	initialized = true
 
-	decoder := json.NewDecoder(os.Stdin)
-	if err = decoder.Decode(d); err != nil {
-		return
-	}
-
-	if err = syscall.Close(0); err != nil {
-		return
-	}
-	if err = syscall.Dup2(3, 0); err != nil {
-		return
-	}
-
 	if len(d.PidFileName) > 0 {
 		d.pidFile = NewLockFile(os.NewFile(4, d.PidFileName))
 		if err = d.pidFile.WritePid(); err != nil {
@@ -180,11 +168,30 @@ func (d *Context) child() (err error) {
 		}
 	}
 
+	decoder := json.NewDecoder(os.Stdin)
+	if err = decoder.Decode(d); err != nil {
+		d.pidFile.Remove()
+		return
+	}
+
+	if err = syscall.Close(0); err != nil {
+		d.pidFile.Remove()
+		return
+	}
+	if err = syscall.Dup2(3, 0); err != nil {
+		d.pidFile.Remove()
+		return
+	}
+
 	if d.Umask != 0 {
 		syscall.Umask(int(d.Umask))
 	}
 	if len(d.Chroot) > 0 {
 		err = syscall.Chroot(d.Chroot)
+		if err != nil {
+			d.pidFile.Remove()
+			return
+		}
 	}
 
 	return
