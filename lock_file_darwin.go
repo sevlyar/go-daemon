@@ -1,11 +1,20 @@
-// +build dragonfly freebsd linux netbsd openbsd plan9 solaris
+// +build darwin
 
 package daemon
 
+/*
+#define __DARWIN_UNIX03 0
+#define KERNEL
+#define _DARWIN_USE_64_BIT_INODE
+#include <dirent.h>
+#include <fcntl.h>
+#include <sys/param.h>
+*/
+import "C"
+
 import (
-	"fmt"
-	"os"
 	"syscall"
+	"unsafe"
 )
 
 func lockFile(fd uintptr) error {
@@ -25,19 +34,10 @@ func unlockFile(fd uintptr) error {
 }
 
 func getFdName(fd uintptr) (name string, err error) {
-	path := fmt.Sprintf("/proc/self/fd/%d", int(fd))
-
-	var (
-		fi os.FileInfo
-		n  int
-	)
-	if fi, err = os.Lstat(path); err != nil {
-		return
+	buf := make([]C.char, int(C.MAXPATHLEN)+1)
+	_, _, errno := syscall.Syscall(syscall.SYS_FCNTL, fd, syscall.F_GETPATH, uintptr(unsafe.Pointer(&buf[0])))
+	if errno == 0 {
+		return C.GoString(&buf[0]), nil
 	}
-	buf := make([]byte, fi.Size()+1)
-
-	if n, err = syscall.Readlink(path, buf); err == nil {
-		name = string(buf[:n])
-	}
-	return
+	return "", errno
 }
