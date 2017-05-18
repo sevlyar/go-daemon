@@ -1,9 +1,16 @@
-# go-daemon [![Build Status](https://travis-ci.org/sevlyar/go-daemon.png?branch=master)](https://travis-ci.org/sevlyar/go-daemon) [![GoDoc](https://godoc.org/github.com/sevlyar/go-daemon?status.png)](https://godoc.org/github.com/sevlyar/go-daemon)
+# go-daemon [![Build Status](https://travis-ci.org/sevlyar/go-daemon.svg?branch=master)](https://travis-ci.org/sevlyar/go-daemon) [![GoDoc](https://godoc.org/github.com/sevlyar/go-daemon?status.svg)](https://godoc.org/github.com/sevlyar/go-daemon)
 
-Library for writing system daemons in golang.
+Library for writing system daemons in Go.
 
 Now supported only UNIX-based OS (Windows is not supported). But the library was tested only on Linux
 and OSX, so that if you have an ability to test the library on other platforms, give me feedback, please.
+
+## Features
+
+* Goroutine-safe daemonization;
+* Out of box work with pid-files;
+* Easy handling of system signals;
+* The control of a daemon.
 
 ## Installation
 
@@ -16,7 +23,7 @@ You can use [gopkg.in](http://labix.org/gopkg.in):
 If you want to use the library in production project, please use vendoring,
 because i can not ensure backward compatibility before release v1.0.
 
-## Idea
+## How it works
 
 We can not use `fork` syscall in Golang's runtime, because child process doesn't inherit
 threads and goroutines in that case. The library uses a simple trick: it runs its own copy with
