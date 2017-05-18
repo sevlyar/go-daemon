@@ -2,10 +2,8 @@ package daemon
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"testing"
 )
 
@@ -89,116 +87,20 @@ func TestReadPid(test *testing.T) {
 }
 
 func TestLockFileLock(test *testing.T) {
-	lock, err := OpenLockFile(filename, fileperm)
+	lock1, err := OpenLockFile(filename, fileperm)
 	if err != nil {
 		test.Fatal(err)
 	}
-	defer lock.Remove()
-
-	if err := lock.Lock(); err != nil {
+	if err := lock1.Lock(); err != nil {
 		test.Fatal(err)
 	}
-	scr, msg, err := createLockScriptAndStart()
+	defer lock1.Remove()
+
+	lock2, err := OpenLockFile(filename, fileperm)
 	if err != nil {
 		test.Fatal(err)
 	}
-	if msg != "error" {
-		test.Fatal("script was able lock file")
+	if err := lock2.Lock(); err != ErrWouldBlock {
+		test.Fatal("To lock file more than once must be unavailable.")
 	}
-	if err = terminateLockScript(scr); err != nil {
-		test.Fatal(err)
-	}
-
-	if err = lock.Unlock(); err != nil {
-		test.Fatal(err)
-	}
-	lock.Close()
-
-	scr, msg, err = createLockScriptAndStart()
-	if err != nil {
-		test.Fatal(err)
-	}
-	if msg != "locked" {
-		test.Fatal("script can not lock file")
-	}
-	lock, err = CreatePidFile(filename, fileperm)
-	if err != ErrWouldBlock {
-		test.Fatal("Lock() not work properly")
-	}
-	if err = terminateLockScript(scr); err != nil {
-		test.Error(err)
-	}
-}
-
-func createLockScriptAndStart() (scr *script, msg string, err error) {
-	var text = fmt.Sprintf(`
-		set -e
-		exec 222>"%s"
-		flock -n 222||echo "error"
-		echo "locked"
-		read inp`, filename)
-
-	scr, err = createScript(text, true)
-	if err != nil {
-		return
-	}
-
-	if err = scr.cmd.Start(); err != nil {
-		return
-	}
-	// wait until the script does not try to lock the file
-	msg, err = scr.get()
-	return
-}
-
-func terminateLockScript(scr *script) (err error) {
-	if err = scr.send(""); err != nil {
-		return
-	}
-	err = scr.cmd.Wait()
-	return
-}
-
-type script struct {
-	cmd    *exec.Cmd
-	stdout io.ReadCloser
-	stdin  io.WriteCloser
-}
-
-func createScript(text string, createPipes bool) (scr *script, err error) {
-	var scrName string
-	if scrName, err = createScriptFile(text); err != nil {
-		return
-	}
-	scr = &script{cmd: exec.Command("bash", scrName)}
-	if createPipes {
-		if scr.stdout, err = scr.cmd.StdoutPipe(); err != nil {
-			return
-		}
-		if scr.stdin, err = scr.cmd.StdinPipe(); err != nil {
-			return
-		}
-	}
-	return
-}
-
-func (scr *script) send(line string) (err error) {
-	_, err = fmt.Fprintln(scr.stdin, line)
-	return
-}
-
-func (scr *script) get() (line string, err error) {
-	_, err = fmt.Fscanln(scr.stdout, &line)
-	return
-}
-
-func createScriptFile(text string) (name string, err error) {
-	var scr *os.File
-	if scr, err = ioutil.TempFile(os.TempDir(), "scr"); err != nil {
-		return
-	}
-	defer scr.Close()
-	name = scr.Name()
-	_, err = scr.WriteString(text)
-	return
 }
