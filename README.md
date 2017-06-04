@@ -52,5 +52,6 @@ func main() {
 
 ## Examples
 
+* [Simple](examples/cmd/gd-simple/)
 * [Log rotation](examples/cmd/gd-log-rotation/)
 * [Signal handling](examples/cmd/gd-signal-handling/)
