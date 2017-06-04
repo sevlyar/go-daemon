@@ -23,6 +23,16 @@ You can use [gopkg.in](http://labix.org/gopkg.in):
 If you want to use the library in production project, please use vendoring,
 because i can not ensure backward compatibility before release v1.0.
 
+## Examples
+
+* [Simple](examples/cmd/gd-simple/)
+* [Log rotation](examples/cmd/gd-log-rotation/)
+* [Signal handling](examples/cmd/gd-signal-handling/)
+
+## Documentation
+
+[godoc.org/github.com/sevlyar/go-daemon](https://godoc.org/github.com/sevlyar/go-daemon)
+
 ## How it works
 
 We can not use `fork` syscall in Golang's runtime, because child process doesn't inherit
@@ -49,9 +59,3 @@ func main() {
 ```
 
 ![](img/idea.png)
-
-## Examples
-
-* [Simple](examples/cmd/gd-simple/)
-* [Log rotation](examples/cmd/gd-log-rotation/)
-* [Signal handling](examples/cmd/gd-signal-handling/)
