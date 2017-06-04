@@ -50,3 +50,6 @@ func main() {
 
 ![](img/idea.png)
 
+## Examples
+
+* [Log rotation](examples/cmd/gd-log-rotation/)
