@@ -9,7 +9,7 @@ import (
 
 var (
 	// ErrWoldBlock indicates on locking pid-file by another process.
-	ErrWouldBlock = errors.New("Daemon: Resource temporarily unavailable")
+	ErrWouldBlock = errors.New("daemon: Resource temporarily unavailable")
 )
 
 // LockFile wraps *os.File and provide functions for locking of files.
