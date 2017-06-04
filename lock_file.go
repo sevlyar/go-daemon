@@ -117,6 +117,8 @@ func (file *LockFile) Remove() error {
 }
 
 // GetFdName returns file name for given descriptor.
+//
+// BUG(yar): GetFdName returns an error for some *nix platforms when full name length of the file is greater than 0x1000.
 func GetFdName(fd uintptr) (name string, err error) {
 	return getFdName(fd)
 }
