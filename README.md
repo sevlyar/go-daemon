@@ -3,7 +3,9 @@
 Library for writing system daemons in Go.
 
 Now supported only UNIX-based OS (Windows is not supported). But the library was tested only on Linux
-and OSX, so that if you have an ability to test the library on other platforms, give me feedback, please.
+and OSX, so that if you have an ability to test the library on other platforms, give me feedback, please (#26).
+
+*Please, feel free to send me bug reports and fixes. Many thanks to all contributors.*
 
 ## Features
 
