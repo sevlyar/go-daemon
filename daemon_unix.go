@@ -178,7 +178,7 @@ func (d *Context) child() (err error) {
 		d.pidFile.Remove()
 		return
 	}
-	if err = syscall.Dup2(3, 0); err != nil {
+	if err = syscallDup(3, 0); err != nil {
 		d.pidFile.Remove()
 		return
 	}
