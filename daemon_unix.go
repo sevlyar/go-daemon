@@ -36,8 +36,7 @@ type Context struct {
 	// If it is nil, the result of os.Environ will be used.
 	Env []string
 	// If Args is non-nil, it gives the command-line args for the
-	// daemon-process. If it is nil, the result of os.Args will be used
-	// (without program name).
+	// daemon-process. If it is nil, the result of os.Args will be used.
 	Args []string
 
 	// Credential holds user and group identities to be assumed by a daemon-process.
