@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"syscall"
 
 	"github.com/kardianos/osext"
@@ -46,6 +47,7 @@ type Context struct {
 
 	// Struct contains only serializable public fields (!!!)
 	abspath  string
+	pidpath  string
 	pidFile  *LockFile
 	logFile  *os.File
 	nullFile *os.File
@@ -120,8 +122,8 @@ func (d *Context) openFiles() (err error) {
 		return
 	}
 
-	if len(d.PidFileName) > 0 {
-		if d.pidFile, err = OpenLockFile(d.PidFileName, d.PidFilePerm); err != nil {
+	if len(d.pidpath) > 0 {
+		if d.pidFile, err = OpenLockFile(d.pidpath, d.PidFilePerm); err != nil {
 			return
 		}
 		if err = d.pidFile.Lock(); err != nil {
@@ -173,6 +175,14 @@ func (d *Context) prepareEnv() (err error) {
 	}
 	d.Env = append(d.Env, mark)
 
+	if len(d.PidFileName) != 0 {
+		if d.pidpath, err = filepath.Abs(d.PidFileName); err != nil {
+			return err
+		}
+		mark = fmt.Sprintf("%s=%s", MARK_PID, d.pidpath)
+		d.Env = append(d.Env, mark)
+	}
+
 	return
 }
 
@@ -203,8 +213,9 @@ func (d *Context) child() (err error) {
 	}
 	initialized = true
 
-	if len(d.PidFileName) > 0 {
-		d.pidFile = NewLockFile(os.NewFile(4, d.PidFileName))
+	d.pidpath = os.Getenv(MARK_PID)
+	if len(d.pidpath) > 0 {
+		d.pidFile = NewLockFile(os.NewFile(4, d.pidpath))
 		if err = d.pidFile.WritePid(); err != nil {
 			return
 		}
