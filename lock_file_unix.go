@@ -3,7 +3,6 @@
 package daemon
 
 import (
-	"fmt"
 	"syscall"
 )
 
@@ -21,20 +20,4 @@ func unlockFile(fd uintptr) error {
 		err = ErrWouldBlock
 	}
 	return err
-}
-
-const pathMax = 0x1000
-
-func getFdName(fd uintptr) (name string, err error) {
-	path := fmt.Sprintf("/proc/self/fd/%d", int(fd))
-	// We use predefined pathMax const because /proc directory contains special files
-	// so that unable to get correct size of pseudo-symlink through lstat.
-	// please see notes and example for readlink syscall:
-	// http://man7.org/linux/man-pages/man2/readlink.2.html#NOTES
-	buf := make([]byte, pathMax)
-	var n int
-	if n, err = syscall.Readlink(path, buf); err == nil {
-		name = string(buf[:n])
-	}
-	return
 }
