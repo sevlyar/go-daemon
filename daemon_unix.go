@@ -47,7 +47,6 @@ type Context struct {
 
 	// Struct contains only serializable public fields (!!!)
 	abspath  string
-	pidpath  string
 	pidFile  *LockFile
 	logFile  *os.File
 	nullFile *os.File
@@ -105,8 +104,10 @@ func (d *Context) parent() (child *os.Process, err error) {
 
 	d.rpipe.Close()
 	encoder := json.NewEncoder(d.wpipe)
-	err = encoder.Encode(d)
-
+	if err = encoder.Encode(d); err != nil {
+		return
+	}
+	_, err = fmt.Fprint(d.wpipe, "\n\n")
 	return
 }
 
@@ -122,12 +123,22 @@ func (d *Context) openFiles() (err error) {
 		return
 	}
 
-	if len(d.pidpath) > 0 {
-		if d.pidFile, err = OpenLockFile(d.pidpath, d.PidFilePerm); err != nil {
+	if len(d.PidFileName) > 0 {
+		if d.PidFileName, err = filepath.Abs(d.PidFileName); err != nil {
+			return err
+		}
+		if d.pidFile, err = OpenLockFile(d.PidFileName, d.PidFilePerm); err != nil {
 			return
 		}
 		if err = d.pidFile.Lock(); err != nil {
 			return
+		}
+		if len(d.Chroot) > 0 {
+			// Calculate PID-file absolute path in child's environment
+			if d.PidFileName, err = filepath.Rel(d.Chroot, d.PidFileName); err != nil {
+				return err
+			}
+			d.PidFileName = "/" + d.PidFileName
 		}
 	}
 
@@ -175,14 +186,6 @@ func (d *Context) prepareEnv() (err error) {
 	}
 	d.Env = append(d.Env, mark)
 
-	if len(d.PidFileName) != 0 {
-		if d.pidpath, err = filepath.Abs(d.PidFileName); err != nil {
-			return err
-		}
-		mark = fmt.Sprintf("%s=%s", MARK_PID, d.pidpath)
-		d.Env = append(d.Env, mark)
-	}
-
 	return
 }
 
@@ -213,18 +216,18 @@ func (d *Context) child() (err error) {
 	}
 	initialized = true
 
-	d.pidpath = os.Getenv(MARK_PID)
-	if len(d.pidpath) > 0 {
-		d.pidFile = NewLockFile(os.NewFile(4, d.pidpath))
-		if err = d.pidFile.WritePid(); err != nil {
-			return
-		}
-	}
-
 	decoder := json.NewDecoder(os.Stdin)
 	if err = decoder.Decode(d); err != nil {
 		d.pidFile.Remove()
 		return
+	}
+
+	// create PID file after context decoding to know PID file full path.
+	if len(d.PidFileName) > 0 {
+		d.pidFile = NewLockFile(os.NewFile(4, d.PidFileName))
+		if err = d.pidFile.WritePid(); err != nil {
+			return
+		}
 	}
 
 	if err = syscall.Close(0); err != nil {

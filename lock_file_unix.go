@@ -1,4 +1,4 @@
-// +build dragonfly freebsd linux netbsd openbsd plan9 solaris
+// +build darwin dragonfly freebsd linux netbsd openbsd plan9 solaris
 
 package daemon
 

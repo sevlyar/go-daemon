@@ -11,7 +11,6 @@ var errNotSupported = errors.New("daemon: Non-POSIX OS is not supported")
 const (
 	MARK_NAME  = "_GO_DAEMON"
 	MARK_VALUE = "1"
-	MARK_PID   = "_GO_DAEMON_PID"
 )
 
 // Default file permissions for log and pid files.
