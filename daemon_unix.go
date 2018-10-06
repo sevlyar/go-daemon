@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
-
-	"github.com/kardianos/osext"
 )
 
 // A Context describes daemon context.
@@ -172,7 +170,7 @@ func (d *Context) closeFiles() (err error) {
 }
 
 func (d *Context) prepareEnv() (err error) {
-	if d.abspath, err = osext.Executable(); err != nil {
+	if d.abspath, err = os.Executable(); err != nil {
 		return
 	}
 
