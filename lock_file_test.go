@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"testing"
 )
 
@@ -84,7 +85,14 @@ func TestLockFileLock(test *testing.T) {
 	if err != nil {
 		test.Fatal(err)
 	}
-	if err := lock2.Lock(); err != ErrWouldBlock {
-		test.Fatal("To lock file more than once must be unavailable.")
+	if runtime.GOOS == "solaris" {
+		// Solaris does not see a double lock attempt by the same process as failure.
+		if err := lock2.Lock(); err != nil {
+			test.Fatal("To lock file more than once must be unavailable.")
+		}
+	} else {
+		if err := lock2.Lock(); err != nil && err != ErrWouldBlock {
+			test.Fatal("To lock file more than once must be unavailable.")
+		}
 	}
 }
