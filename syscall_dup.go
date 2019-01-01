@@ -1,4 +1,5 @@
 // +build !linux !arm64
+// +build !solaris
 // +build !windows
 
 package daemon
