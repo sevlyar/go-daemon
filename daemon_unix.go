@@ -170,7 +170,7 @@ func (d *Context) closeFiles() (err error) {
 }
 
 func (d *Context) prepareEnv() (err error) {
-	if d.abspath, err = os.Executable(); err != nil {
+	if d.abspath, err = osExecutable(); err != nil {
 		return
 	}
 
