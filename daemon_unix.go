@@ -216,7 +216,6 @@ func (d *Context) child() (err error) {
 
 	decoder := json.NewDecoder(os.Stdin)
 	if err = decoder.Decode(d); err != nil {
-		d.pidFile.Remove()
 		return
 	}
 
