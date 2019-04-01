@@ -9,7 +9,7 @@ import (
 
 // ErrStop should be returned signal handler function
 // for termination of handling signals.
-var ErrStop = errors.New("stop serve signals")
+var errStop = errors.New("daemon: stop serve signals")
 
 // SignalHandlerFunc is the interface for signal handler functions.
 type SignalHandlerFunc func(sig os.Signal) (err error)
