@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
-
-	"github.com/golang/glog"
 )
 
 // A Context describes daemon context.
@@ -218,7 +216,6 @@ func (d *Context) child() (err error) {
 
 	decoder := json.NewDecoder(os.Stdin)
 	if err = decoder.Decode(d); err != nil {
-		glog.Errorf("Failed to decode - %s", err)
 		return
 	}
 
@@ -235,12 +232,7 @@ func (d *Context) child() (err error) {
 		}()
 	}
 
-	if err = syscall.Close(0); err != nil {
-		glog.Errorf("Failed to close - %s", err)
-		return
-	}
 	if err = syscallDup(3, 0); err != nil {
-		glog.Errorf("Failed to dup - %s", err)
 		return
 	}
 
