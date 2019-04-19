@@ -10,18 +10,19 @@ import (
 )
 
 var (
-	signal = flag.String("s", "", `send signal to the daemon
-        stop — shutdown`)
+	signal = flag.String("s", "", `Send signal to the daemon:
+  stop — shutdown`)
 )
 
-const logFileName = "log"
+const logFileName = "sample.log"
+const pidFileName = "sample.pid"
 
 func main() {
 	flag.Parse()
 	daemon.AddCommand(daemon.StringFlag(signal, "stop"), syscall.SIGTERM, termHandler)
 
 	cntxt := &daemon.Context{
-		PidFileName: "pid",
+		PidFileName: pidFileName,
 		PidFilePerm: 0644,
 		LogFileName: logFileName,
 		LogFilePerm: 0640,
@@ -33,8 +34,9 @@ func main() {
 	if len(daemon.ActiveFlags()) > 0 {
 		d, err := cntxt.Search()
 		if err != nil {
-			log.Fatalln("Unable send signal to the daemon:", err)
+			log.Fatalf("Unable send signal to the daemon: %s", err.Error())
 		}
+
 		daemon.SendCommands(d)
 		return
 	}
@@ -57,7 +59,7 @@ func main() {
 
 	err = daemon.ServeSignals()
 	if err != nil {
-		log.Println("Error:", err)
+		log.Printf("Error: %s", err.Error())
 	}
 	log.Println("daemon terminated")
 }
@@ -65,8 +67,9 @@ func main() {
 func setupLog() {
 	lf, err := NewLogFile(logFileName, os.Stderr)
 	if err != nil {
-		log.Fatal("Unable to create log file: ", err)
+		log.Fatalf("Unable to create log file: %s", err.Error())
 	}
+
 	log.SetOutput(lf)
 	// rotate log every 30 seconds.
 	rotateLogSignal := time.Tick(30 * time.Second)
@@ -74,7 +77,7 @@ func setupLog() {
 		for {
 			<-rotateLogSignal
 			if err := lf.Rotate(); err != nil {
-				log.Fatal("Unable to rotate log: ", err)
+				log.Fatalf("Unable to rotate log: %s", err.Error())
 			}
 		}
 	}()
