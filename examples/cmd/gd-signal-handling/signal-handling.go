@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	signal = flag.String("s", "", `send signal to the daemon
-		quit — graceful shutdown
-		stop — fast shutdown
-		reload — reloading the configuration file`)
+	signal = flag.String("s", "", `Send signal to the daemon:
+  quit — graceful shutdown
+  stop — fast shutdown
+  reload — reloading the configuration file`)
 )
 
 func main() {
@@ -23,9 +23,9 @@ func main() {
 	daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
 
 	cntxt := &daemon.Context{
-		PidFileName: "pid",
+		PidFileName: "sample.pid",
 		PidFilePerm: 0644,
-		LogFileName: "log",
+		LogFileName: "sample.log",
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
@@ -35,7 +35,7 @@ func main() {
 	if len(daemon.ActiveFlags()) > 0 {
 		d, err := cntxt.Search()
 		if err != nil {
-			log.Fatalln("Unable send signal to the daemon:", err)
+			log.Fatalf("Unable send signal to the daemon: %s", err.Error())
 		}
 		daemon.SendCommands(d)
 		return
@@ -57,8 +57,9 @@ func main() {
 
 	err = daemon.ServeSignals()
 	if err != nil {
-		log.Println("Error:", err)
+		log.Printf("Error: %s", err.Error())
 	}
+
 	log.Println("daemon terminated")
 }
 
@@ -68,11 +69,11 @@ var (
 )
 
 func worker() {
-	LOOP:
+LOOP:
 	for {
 		time.Sleep(time.Second) // this is work to be done by worker.
 		select {
-		case <- stop:
+		case <-stop:
 			break LOOP
 		default:
 		}
