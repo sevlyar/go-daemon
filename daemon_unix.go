@@ -216,7 +216,6 @@ func (d *Context) child() (err error) {
 
 	decoder := json.NewDecoder(os.Stdin)
 	if err = decoder.Decode(d); err != nil {
-		d.pidFile.Remove()
 		return
 	}
 
@@ -226,14 +225,14 @@ func (d *Context) child() (err error) {
 		if err = d.pidFile.WritePid(); err != nil {
 			return
 		}
+		defer func() {
+			if err != nil {
+				d.pidFile.Remove()
+			}
+		}()
 	}
 
-	if err = syscall.Close(0); err != nil {
-		d.pidFile.Remove()
-		return
-	}
 	if err = syscallDup(3, 0); err != nil {
-		d.pidFile.Remove()
 		return
 	}
 
@@ -243,7 +242,6 @@ func (d *Context) child() (err error) {
 	if len(d.Chroot) > 0 {
 		err = syscall.Chroot(d.Chroot)
 		if err != nil {
-			d.pidFile.Remove()
 			return
 		}
 	}
