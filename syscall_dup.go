@@ -3,10 +3,8 @@
 
 package daemon
 
-import (
-	"syscall"
-)
+import "golang.org/x/sys/unix"
 
 func syscallDup(oldfd int, newfd int) (err error) {
-	return syscall.Dup2(oldfd, newfd)
+	return unix.Dup2(oldfd, newfd)
 }
