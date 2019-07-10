@@ -249,12 +249,10 @@ func (d *Context) child() (err error) {
 	return
 }
 
-func (d *Context) release() (err error) {
-	if !initialized {
-		return
+func (d *Context) release() error {
+	if !initialized || d.pidFile == nil {
+		return nil
 	}
-	if d.pidFile != nil {
-		err = d.pidFile.Remove()
-	}
-	return
+
+	return d.pidFile.Remove()
 }
