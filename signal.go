@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"os/signal"
-	"syscall"
 )
 
 // ErrStop should be returned signal handler function
@@ -46,12 +45,6 @@ func ServeSignals() (err error) {
 	}
 
 	return
-}
-
-var handlers = make(map[os.Signal]SignalHandlerFunc)
-
-func init() {
-	handlers[syscall.SIGTERM] = sigtermDefaultHandler
 }
 
 func sigtermDefaultHandler(sig os.Signal) error {
