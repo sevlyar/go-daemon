@@ -28,6 +28,7 @@ func TestCompilation(t *testing.T) {
 		"linux/amd64",
 		"linux/arm",
 		"linux/arm64",
+		"linux/riscv64",
 		"netbsd/386",
 		"netbsd/amd64",
 		"netbsd/arm",
@@ -51,6 +52,10 @@ func TestCompilation(t *testing.T) {
 		goos, goarch := pair[0], pair[1]
 		if goos == "solaris" && !requireMinor(7) {
 			t.Log("skip, solaris requires at least go1.7")
+			continue
+		}
+		if goarch == "riscv64" && !requireMinor(14) {
+			t.Log("skip, riscv64 requires at least go1.14")
 			continue
 		}
 		cmd := exec.Command("go", "build", "./")
