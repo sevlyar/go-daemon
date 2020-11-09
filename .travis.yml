@@ -3,10 +3,10 @@ arch:
   - amd64
   - ppc64le
 go:
+  - 1.11
   - 1.12
   - 1.13
   - 1.14
-  - tip
 before_install:
   - go get -t -v ./...
 
