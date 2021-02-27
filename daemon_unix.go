@@ -68,6 +68,13 @@ func (d *Context) search() (daemon *os.Process, err error) {
 			return
 		}
 		daemon, err = os.FindProcess(pid)
+		if err == nil && daemon != nil {
+			// Send a test signal to test if this daemon is actually alive or dead
+			// An error means it is dead
+			if daemon.Signal(syscall.Signal(0)) != nil {
+				daemon = nil
+			}
+		}
 	}
 	return
 }
