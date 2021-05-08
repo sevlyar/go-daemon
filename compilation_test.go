@@ -18,7 +18,6 @@ func TestCompilation(t *testing.T) {
 	}
 
 	pairs := []string{
-		"darwin/386",
 		"darwin/amd64",
 		"dragonfly/amd64",
 		"freebsd/386",
