@@ -39,6 +39,6 @@ func (d *Context) Search() (daemon *os.Process, err error) {
 }
 
 // Release provides correct pid-file release in daemon.
-func (d *Context) Release() (err error) {
+func (d *Context) Release() error {
 	return d.release()
 }

@@ -45,6 +45,8 @@ parent's operations and runs its own copy with mark, and if the mark is setted -
 executes child's operations:
 
 ```go
+import "log"
+
 func main() {
 	Pre()
 
@@ -54,7 +56,12 @@ func main() {
 	if child != nil {
 		PostParent()
 	} else {
-		defer context.Release()
+		defer func() {
+			if err := context.Release(); err != nil {
+				log.Printf("Unable to release pid-file: %s", err.Error())
+			}
+		}()
+
 		PostChild()
 	}
 }
