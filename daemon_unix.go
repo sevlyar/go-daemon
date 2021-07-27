@@ -148,7 +148,11 @@ func (d *Context) openFiles() (err error) {
 	}
 
 	if len(d.LogFileName) > 0 {
-		if d.logFile, err = os.OpenFile(d.LogFileName,
+		if d.LogFileName == "/dev/stdout" {
+			d.logFile = os.Stdout
+		} else if d.LogFileName == "/dev/stderr" {
+			d.logFile = os.Stderr
+		} else if d.logFile, err = os.OpenFile(d.LogFileName,
 			os.O_WRONLY|os.O_CREATE|os.O_APPEND, d.LogFilePerm); err != nil {
 			return
 		}
