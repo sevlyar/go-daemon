@@ -1,3 +1,4 @@
+//go:build (!linux || !arm64) && !windows && !go1.7
 // +build !linux !arm64
 // +build !windows
 // +build !go1.7
