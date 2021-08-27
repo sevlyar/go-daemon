@@ -1,3 +1,4 @@
+//go:build linux && (riscv64 || arm64)
 // +build linux
 // +build riscv64 arm64
 
