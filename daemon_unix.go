@@ -110,10 +110,7 @@ func (d *Context) parent() (child *os.Process, err error) {
 
 	d.rpipe.Close()
 	encoder := json.NewEncoder(d.wpipe)
-	if err = encoder.Encode(d); err != nil {
-		return
-	}
-	_, err = fmt.Fprint(d.wpipe, "\n\n")
+	err = encoder.Encode(d)
 	return
 }
 
