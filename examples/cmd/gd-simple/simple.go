@@ -10,8 +10,7 @@ import (
 )
 
 // To terminate the daemon use:
-//
-//	kill `cat sample.pid`
+//  kill `cat sample.pid`
 func main() {
 	cntxt := &daemon.Context{
 		PidFileName: "sample.pid",
