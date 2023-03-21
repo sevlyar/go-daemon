@@ -53,6 +53,10 @@ type Context struct {
 	rpipe, wpipe *os.File
 }
 
+func (d *Context) SetLogFile(fd *os.File) {
+	d.logFile = fd
+}
+
 func (d *Context) reborn() (child *os.Process, err error) {
 	if !WasReborn() {
 		child, err = d.parent()
