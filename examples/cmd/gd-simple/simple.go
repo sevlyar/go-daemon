@@ -6,11 +6,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/sevlyar/go-daemon"
+	"github.com/cvvz/go-daemon"
 )
 
 // To terminate the daemon use:
-//  kill `cat sample.pid`
+//
+//	kill `cat sample.pid`
 func main() {
 	cntxt := &daemon.Context{
 		PidFileName: "sample.pid",

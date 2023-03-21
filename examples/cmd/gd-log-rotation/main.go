@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"github.com/sevlyar/go-daemon"
+	"github.com/cvvz/go-daemon"
 	"log"
 	"os"
 	"syscall"
