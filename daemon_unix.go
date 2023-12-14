@@ -173,7 +173,9 @@ func (d *Context) closeFiles() (err error) {
 	}
 	cl(&d.rpipe)
 	cl(&d.wpipe)
-	cl(&d.logFile)
+	if d.logFile != os.Stdout && d.logFile != os.Stderr {
+		cl(&d.logFile)
+	}
 	cl(&d.nullFile)
 	if d.pidFile != nil {
 		d.pidFile.Close()
