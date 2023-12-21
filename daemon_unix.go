@@ -176,7 +176,6 @@ func (d *Context) closeFiles() (err error) {
 	if d.logFile != os.Stdout && d.logFile != os.Stderr {
 		cl(&d.logFile)
 	}
-	cl(&d.nullFile)
 	if d.pidFile != nil {
 		d.pidFile.Close()
 		d.pidFile = nil
@@ -197,7 +196,9 @@ func (d *Context) prepareEnv() (err error) {
 	if len(d.Env) == 0 {
 		d.Env = os.Environ()
 	}
-	d.Env = append(d.Env, mark)
+	if !containers(d.Env, mark) {
+		d.Env = append(d.Env, mark)
+	}
 
 	return
 }
@@ -270,4 +271,23 @@ func (d *Context) release() error {
 	}
 
 	return d.pidFile.Remove()
+}
+
+func (d *Context) clean() (err error) {
+	if d.PidFileName == "" {
+		return nil
+	}
+	if d.pidFile, err = OpenLockFile(d.PidFileName, d.PidFilePerm); err != nil {
+		return
+	}
+	return d.pidFile.Remove()
+}
+
+func containers(slice []string, member string) bool {
+	for _, ele := range slice {
+		if ele == member {
+			return true
+		}
+	}
+	return false
 }
