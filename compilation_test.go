@@ -27,6 +27,7 @@ func TestCompilation(t *testing.T) {
 		"linux/amd64",
 		"linux/arm",
 		"linux/arm64",
+		"linux/riscv64",
 		"netbsd/386",
 		"netbsd/amd64",
 		"netbsd/arm",
@@ -52,6 +53,10 @@ func TestCompilation(t *testing.T) {
 			t.Log("skip, solaris requires at least go1.7")
 			continue
 		}
+		if goarch == "riscv64" && !requireMinor(14) {
+			t.Log("skip, riscv64 requires at least go1.14")
+			continue
+		}
 		cmd := exec.Command("go", "build", "./")
 		env := append([]string(nil), env...)
 		cmd.Env = append(env, "GOOS="+goos, "GOARCH="+goarch)
@@ -71,9 +76,9 @@ func requireMinor(minor int) bool {
 		return true
 	}
 	str = strings.TrimPrefix(str, "go1.")
-	ver, err := strconv.Atoi(str)
+	ver, err := strconv.ParseFloat(str, 10)
 	if err != nil {
 		return false
 	}
-	return ver >= minor
+	return ver >= float64(minor)
 }
