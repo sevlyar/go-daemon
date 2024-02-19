@@ -42,3 +42,7 @@ func (d *Context) Search() (daemon *os.Process, err error) {
 func (d *Context) Release() error {
 	return d.release()
 }
+
+func (d *Context) Clean() error {
+	return d.clean()
+}
