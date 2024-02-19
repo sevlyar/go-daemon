@@ -200,6 +200,12 @@ func (d *Context) prepareEnv() (err error) {
 	return
 }
 
+func (d *Context) clearEnv() {
+	if _, present := os.LookupEnv(MARK_NAME); present {
+		os.Unsetenv(MARK_NAME)
+	}
+}
+
 func (d *Context) files() (f []*os.File) {
 	log := d.nullFile
 	if d.logFile != nil {
@@ -258,6 +264,8 @@ func (d *Context) child() (err error) {
 			return
 		}
 	}
+
+	d.clearEnv()
 
 	return
 }
