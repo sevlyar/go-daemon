@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/sevlyar/go-daemon"
 	"log"
 	"os"
 	"syscall"
 	"time"
+
+	"github.com/sevlyar/go-daemon"
 )
 
 var (
@@ -37,7 +38,10 @@ func main() {
 		if err != nil {
 			log.Fatalf("Unable send signal to the daemon: %s", err.Error())
 		}
-		daemon.SendCommands(d)
+		err = daemon.SendCommands(d)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
 		return
 	}
 
