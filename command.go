@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -69,12 +70,15 @@ func AddFlag(f Flag, sig os.Signal) {
 
 // SendCommands sends active signals to the given process.
 func SendCommands(p *os.Process) (err error) {
+	if p == nil {
+		return fmt.Errorf("process not found")
+	}
 	for _, sig := range signals() {
 		if err = p.Signal(sig); err != nil {
-			return
+			return fmt.Errorf("failed to send signal %d: %w", sig, err)
 		}
 	}
-	return
+	return nil
 }
 
 // ActiveFlags returns flags that has the state 'set'.
