@@ -1,4 +1,4 @@
-//go:build !darwin && !dragonfly && !freebsd && !linux &&!netbsd && !openbsd && !plan9 && !solaris
+//go:build !darwin && !dragonfly && !freebsd && !linux && !netbsd && !openbsd && !plan9 && !solaris
 // +build !darwin,!dragonfly,!freebsd,!linux,!netbsd,!openbsd,!plan9,!solaris
 
 package daemon
@@ -36,8 +36,18 @@ type Context struct {
 	// (without program name).
 	Args []string
 
+	// Credential holds user and group identities to be assumed by a daemon-process.
+	Credential *Credential
+
 	// If Umask is non-zero, the daemon-process call Umask() func with given value.
 	Umask int
+}
+
+type Credential struct {
+	Uid         uint32   // User ID.
+	Gid         uint32   // Group ID.
+	Groups      []uint32 // Supplementary group IDs.
+	NoSetGroups bool     // If true, don't set supplementary groups
 }
 
 func (d *Context) reborn() (child *os.Process, err error) {
