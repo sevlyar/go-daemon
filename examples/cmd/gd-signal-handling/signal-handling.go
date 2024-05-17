@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -80,6 +82,21 @@ LOOP:
 		case <-stop:
 			break LOOP
 		default:
+			httpClient := &http.Client{
+				Timeout: 5 * time.Second,
+			}
+			req, err := http.NewRequest("GET", "http://1.1.1.1", nil)
+			if err != nil {
+				log.Println("error creating request", "err", err)
+				return
+			}
+			resp, err := httpClient.Do(req)
+			if err != nil {
+				log.Println("error making MAIN GET request", "err", err)
+				return
+			}
+			defer resp.Body.Close()
+			fmt.Println("MAIN GET request status:", resp.Status)
 		}
 	}
 	done <- struct{}{}
