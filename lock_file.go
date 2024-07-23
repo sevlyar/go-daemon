@@ -3,6 +3,7 @@ package daemon
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
