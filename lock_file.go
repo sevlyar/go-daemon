@@ -101,7 +101,6 @@ func (file *LockFile) ReadPid() (pid int, err error) {
 // Remove removes lock, closes and removes an open file.
 func (file *LockFile) Remove() error {
 	defer file.Close()
-
 	if err := file.Unlock(); err != nil {
 		return err
 	}
