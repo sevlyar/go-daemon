@@ -5,6 +5,7 @@ package daemon
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -74,10 +75,13 @@ func (d *Context) search() (daemon *os.Process, err error) {
 		}
 		daemon, err = os.FindProcess(pid)
 		if err == nil && daemon != nil {
-			// Send a test signal to test if this daemon is actually alive or dead
-			// An error means it is dead
+
+			// Send a test signal to test if this daemon is actually alive or dead.
+			// An error means it is dead also remove residual Pid File.
 			if daemon.Signal(syscall.Signal(0)) != nil {
+				os.Remove(d.PidFileName)
 				daemon = nil
+				return nil, errors.New("daemon: search process doesn't exist")
 			}
 		}
 	}
